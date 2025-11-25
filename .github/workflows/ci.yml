@@ -37,7 +37,7 @@ jobs:
             --platform linux/amd64 \
             --tag "$IMAGE_NAME:${{ github.sha }}" \
             --tag "$IMAGE_NAME:latest" \
-            --push .   yarn install
+            --push .
 
   deploy:
     runs-on: ubuntu-latest
