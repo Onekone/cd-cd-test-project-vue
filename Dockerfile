@@ -5,7 +5,7 @@ WORKDIR /app
 RUN corepack enable
 COPY .yarn .yarn
 COPY .pnp.cjs .pnp.loader.mjs package.json yarn.lock ./
-RUN yarn install --immutable
+RUN yarn install
 
 COPY . .
 RUN yarn build
