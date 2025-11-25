@@ -1,7 +1,12 @@
 FROM node:22-alpine AS build
 WORKDIR /app
-COPY package.json yarn.lock ./
-RUN yarn install
+
+# Use the project-specified Yarn version and fail if lockfile needs updates
+RUN corepack enable
+COPY .yarn .yarn
+COPY .pnp.cjs .pnp.loader.mjs package.json yarn.lock ./
+RUN yarn install --immutable
+
 COPY . .
 RUN yarn build
 

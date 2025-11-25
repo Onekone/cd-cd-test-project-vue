@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   web:
+    image: ${DOCKER_IMAGE:-local/vue-spa}:${DOCKER_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
