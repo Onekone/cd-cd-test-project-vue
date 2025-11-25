@@ -13,8 +13,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: corepack enable
-      - run: corepack prepare yarn@4.5.1 --activate
       - run: yarn install
       - run: yarn test
       - run: yarn build
@@ -39,7 +37,7 @@ jobs:
             --platform linux/amd64 \
             --tag "$IMAGE_NAME:${{ github.sha }}" \
             --tag "$IMAGE_NAME:latest" \
-            --push .
+            --push .   yarn install
 
   deploy:
     runs-on: ubuntu-latest
