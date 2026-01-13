@@ -54,22 +54,39 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          script: |
-            set -euo pipefail
+          envs: GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        script: |
+          set -euo pipefail
 
-            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            export DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
-            export DOCKER_TAG=${{ github.sha }}
-            export DOCKER_IMAGE="${DOCKER_USERNAME}/vue-spa"
+          export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+          export DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
+          export DOCKER_TAG=${{ github.sha }}
+          export DOCKER_IMAGE="${DOCKER_USERNAME}/vue-spa"
 
-            # Создать директорию, если её нет, и клонировать репозиторий
-            if [ ! -d "/home/samurainisa/cd-cd-test-project-vue" ]; then
-              mkdir -p /home/samurainisa/cd-cd-test-project-vue
+          # Создать директорию, если её нет, и клонировать репозиторий
+          if [ ! -d "/home/samurainisa/cd-cd-test-project-vue" ]; then
+            mkdir -p /home/samurainisa/cd-cd-test-project-vue
+            # Клонировать репозиторий с токеном (если репозиторий приватный)
+            if [ -n "$GITHUB_TOKEN" ]; then
+              git clone https://${GITHUB_TOKEN}@github.com/samurainisa/cd-cd-test-project-vue.git /home/samurainisa/cd-cd-test-project-vue
+            else
               git clone https://github.com/samurainisa/cd-cd-test-project-vue.git /home/samurainisa/cd-cd-test-project-vue
             fi
+          fi
 
-            cd /home/samurainisa/cd-cd-test-project-vue
-            git pull origin main
+          cd /home/samurainisa/cd-cd-test-project-vue
+          # Настроить git remote с токеном (если репозиторий приватный)
+          if [ -n "$GITHUB_TOKEN" ]; then
+            git remote set-url origin https://${GITHUB_TOKEN}@github.com/samurainisa/cd-cd-test-project-vue.git 2>/dev/null || true
+          else
+            git remote set-url origin https://github.com/samurainisa/cd-cd-test-project-vue.git 2>/dev/null || true
+          fi
+          git pull origin main || {
+            echo "Failed to pull. Make sure the repository is accessible."
+            exit 1
+          }
 
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             DOCKER_IMAGE=$DOCKER_IMAGE DOCKER_TAG=$DOCKER_TAG docker compose pull
