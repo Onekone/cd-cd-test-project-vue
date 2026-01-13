@@ -61,7 +61,7 @@ jobs:
             export DOCKER_TAG=${{ github.sha }}
             export DOCKER_IMAGE="${DOCKER_USERNAME}/vue-spa"
 
-            cd /home/nikita_s/cd-cd-test-project-vue
+            cd /home/samurainisa/cd-cd-test-project-vue
             git pull origin main
 
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
