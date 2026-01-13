@@ -65,24 +65,21 @@ jobs:
             export DOCKER_TAG=${{ github.sha }}
             export DOCKER_IMAGE="${DOCKER_USERNAME}/vue-spa"
 
-            # Создать директорию, если её нет, и клонировать репозиторий
-            if [ ! -d "/home/samurainisa/cd-cd-test-project-vue" ]; then
-              mkdir -p /home/samurainisa/cd-cd-test-project-vue
-              # Клонировать репозиторий с токеном (если репозиторий приватный)
-              if [ -n "$GITHUB_TOKEN" ]; then
-                git clone https://${GITHUB_TOKEN}@github.com/samurainisa/cd-cd-test-project-vue.git /home/samurainisa/cd-cd-test-project-vue
-              else
-                git clone https://github.com/samurainisa/cd-cd-test-project-vue.git /home/samurainisa/cd-cd-test-project-vue
-              fi
+            REPO_DIR="/home/samurainisa/cd-cd-test-project-vue"
+            REPO_URL="https://github.com/samurainisa/cd-cd-test-project-vue.git"
+            if [ -n "$GITHUB_TOKEN" ]; then
+              REPO_URL="https://${GITHUB_TOKEN}@github.com/samurainisa/cd-cd-test-project-vue.git"
             fi
 
-            cd /home/samurainisa/cd-cd-test-project-vue
-            # Настроить git remote с токеном (если репозиторий приватный)
-            if [ -n "$GITHUB_TOKEN" ]; then
-              git remote set-url origin https://${GITHUB_TOKEN}@github.com/samurainisa/cd-cd-test-project-vue.git 2>/dev/null || true
-            else
-              git remote set-url origin https://github.com/samurainisa/cd-cd-test-project-vue.git 2>/dev/null || true
+            # Если нет .git или директории — пересобираем
+            if [ ! -d "${REPO_DIR}/.git" ]; then
+              rm -rf "${REPO_DIR}"
+              mkdir -p "${REPO_DIR}"
+              git clone "${REPO_URL}" "${REPO_DIR}"
             fi
+
+            cd "${REPO_DIR}"
+            git remote set-url origin "${REPO_URL}" 2>/dev/null || true
             git pull origin main || {
               echo "Failed to pull. Make sure the repository is accessible."
               exit 1
