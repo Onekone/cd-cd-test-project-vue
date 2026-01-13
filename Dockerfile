@@ -3,8 +3,7 @@ WORKDIR /app
 
 # Use the project-specified Yarn version and fail if lockfile needs updates
 RUN corepack enable
-COPY .yarn .yarn
-COPY .pnp.cjs .pnp.loader.mjs package.json yarn.lock ./
+COPY package.json yarn.lock ./
 RUN yarn install
 
 COPY . .
